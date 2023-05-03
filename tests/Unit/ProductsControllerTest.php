@@ -1,34 +1,37 @@
 <?php
 
-namespace Tests\Unit;
+namespace Tests\Feature;
 
-
-use App\Http\Controllers\ProductsController;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\WithFaker;
+use App\Models\Product;
 use Tests\TestCase;
-
 
 class ProductsControllerTest extends TestCase
 {
-    /**
-     * A basic unit test example.
-     *
-     * @return void
-     */
+    use RefreshDatabase;
 
-    public function test_index()
+    /** @test */
+    public function it_can_display_all_products()
     {
-        $this->data = new ProductsController();
-        $response = $this->data->index();
-        $this->assertTrue(true);
+        $products = Product::factory()->count(3)->create();
+
+        $response = $this->get(route('products.index'));
+
+        $response->assertStatus(200);
+        $response->assertViewIs('products.index');
+        $response->assertViewHas('products');
+        foreach ($products as $product) {
+            $response->assertSeeText($product->name);
+        }
     }
-    public function test_show()
+
+    /** @test */
+    public function it_can_show_the_create_product_form()
     {
-        $this->assertTrue(true);
-    }
-    public function test_create()
-    {
-        $this->data = new ProductsController();
-        $response = $this->data->create();
-        $this->assertTrue(true);
+        $response = $this->get(route('products.create'));
+
+        $response->assertStatus(200);
+        $response->assertViewIs('products.create');
     }
 }
